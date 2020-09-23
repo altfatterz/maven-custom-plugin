@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@Mojo(name = "dependency-counter", defaultPhase = LifecyclePhase.PROCESS_RESOURCES)
-public class DependencyCounterMojo extends AbstractMojo {
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_RESOURCES)
+public class JsonTranslationFilesGeneratorMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "src/main/resources/static/i18n/translations.csv", required = true)
     private File input;

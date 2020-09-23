@@ -10,7 +10,7 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <modules>
-        <module>counter-maven-plugin</module>
+        <module>translation-files-generator</module>
         <module>usage-example</module>
     </modules>
 

@@ -34,18 +34,15 @@
         <plugins>
             <plugin>
                 <groupId>org.example</groupId>
-                <artifactId>counter-maven-plugin</artifactId>
+                <artifactId>translation-files-generator</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>dependency-counter</goal>
+                            <goal>generate</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <scope>test</scope>
-                </configuration>
             </plugin>
         </plugins>
     </build>
