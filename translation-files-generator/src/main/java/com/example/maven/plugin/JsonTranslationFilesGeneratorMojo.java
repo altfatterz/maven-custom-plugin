@@ -104,13 +104,5 @@ public class JsonTranslationFilesGeneratorMojo extends AbstractMojo {
             this.code = code;
             this.column = column;
         }
-
-        public String getCode() {
-            return code;
-        }
-
-        public int getColumn() {
-            return column;
-        }
     }
 }
