@@ -32,41 +32,38 @@ public class DependencyCounterMojo extends AbstractMojo {
         getLog().info("Generating translation files...");
 
         try {
-
-            CloseableCsvReader reader = CsvParser.reader(input);
-            JsonFactory jsonFactory = new JsonFactory();
-
-            Iterator<String[]> iterator = reader.iterator();
-            String[] headers = iterator.next();
-
-            try (JsonGenerator jgEN = createJsonGenerator("en", jsonFactory);
-                 JsonGenerator jgDE = createJsonGenerator("de", jsonFactory);
-                 JsonGenerator jgFR = createJsonGenerator("fr", jsonFactory);
-                 JsonGenerator jgIT = createJsonGenerator("it", jsonFactory)) {
-
-                writeContent(jgEN, iterator, 2);
-                writeContent(jgDE, iterator, 3);
-                writeContent(jgFR, iterator, 4);
-                writeContent(jgIT, iterator, 5);
-            }
-
-
+            generateTranslationInJson(input, "en", 1);
+            generateTranslationInJson(input, "de", 2);
+            generateTranslationInJson(input, "fr", 3);
+            generateTranslationInJson(input, "it", 4);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    public void generateTranslationInJson(File input, String language, int languageColumn) throws IOException {
+        JsonFactory jsonFactory = new JsonFactory();
+        CloseableCsvReader reader = CsvParser.reader(input);
+        Iterator<String[]> iterator = reader.iterator();
+        iterator.next(); // ignore headers
+        try (JsonGenerator jsonGenerator = createJsonGenerator(language, jsonFactory)) {
+            writeContent(jsonGenerator, iterator, languageColumn);
+        }
+    }
+
 
     void writeContent(JsonGenerator jsonGenerator, Iterator<String[]> iterator, int column) throws IOException {
         jsonGenerator.writeStartObject();
         jsonGenerator.writeRaw('\n');
         while (iterator.hasNext()) {
             String[] values = iterator.next();
-            getLog().info("values:");
-            for (String value : values) {
-                getLog().info(value);
-            }
             jsonGenerator.writeFieldName(values[0]);
-            jsonGenerator.writeString(values[column]);
+            if (values[column] != null && values[column].isEmpty()) {
+                jsonGenerator.writeString(values[0]);
+            } else {
+                jsonGenerator.writeString(values[column]);
+            }
+
         }
         jsonGenerator.writeRaw('\n');
         jsonGenerator.writeEndObject();
@@ -74,8 +71,7 @@ public class DependencyCounterMojo extends AbstractMojo {
 
     Path createTranslationFile(String language) throws IOException {
         Path path = Paths.get(output + "/locale-" + language + ".json");
-        System.out.println("path:" + path);
-        // Files.deleteIfExists(path);
+        Files.deleteIfExists(path);
         return Files.createFile(path);
     }
 
