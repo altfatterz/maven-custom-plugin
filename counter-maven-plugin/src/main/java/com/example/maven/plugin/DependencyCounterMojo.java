@@ -15,7 +15,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Mojo(name = "dependency-counter", defaultPhase = LifecyclePhase.PROCESS_RESOURCES)
 public class DependencyCounterMojo extends AbstractMojo {
@@ -27,30 +31,41 @@ public class DependencyCounterMojo extends AbstractMojo {
     private File output;
 
     public void execute() {
-        getLog().info("input:" + input.getAbsolutePath());
-        getLog().info("output:" + output.getAbsolutePath());
-        getLog().info("Generating translation files...");
+        getLog().info("Generating JSON translation files...");
+        getLog().info("Processing input CSV translation file from :" + input.getAbsolutePath());
+        getLog().info("Output will be written to directory:" + output.getAbsolutePath());
 
-        try {
-            generateTranslationInJson(input, "en", 1);
-            generateTranslationInJson(input, "de", 2);
-            generateTranslationInJson(input, "fr", 3);
-            generateTranslationInJson(input, "it", 4);
+        List<Language> languages = getLanguages(input);
+        languages.stream().forEach(language -> generateTranslationInJson(input, language.code, language.column));
+
+        getLog().info("JSON translation were successfully generated");
+    }
+
+
+    private List<Language> getLanguages(File input) {
+        List<Language> languages = Collections.emptyList();
+        try (CloseableCsvReader reader = CsvParser.reader(input)) {
+            String[] headers = reader.iterator().next();
+            languages = IntStream.range(1, headers.length)
+                    .mapToObj(i -> new Language(headers[i].toLowerCase(), i))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return languages;
+    }
+
+    public void generateTranslationInJson(File input, String language, int languageColumn) {
+        try (CloseableCsvReader reader = CsvParser.reader(input)) {
+            Iterator<String[]> iterator = reader.iterator();
+            iterator.next(); // ignore headers
+            try (JsonGenerator jsonGenerator = createJsonGenerator(language, new JsonFactory())) {
+                writeContent(jsonGenerator, iterator, languageColumn);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-    public void generateTranslationInJson(File input, String language, int languageColumn) throws IOException {
-        JsonFactory jsonFactory = new JsonFactory();
-        CloseableCsvReader reader = CsvParser.reader(input);
-        Iterator<String[]> iterator = reader.iterator();
-        iterator.next(); // ignore headers
-        try (JsonGenerator jsonGenerator = createJsonGenerator(language, jsonFactory)) {
-            writeContent(jsonGenerator, iterator, languageColumn);
-        }
-    }
-
 
     void writeContent(JsonGenerator jsonGenerator, Iterator<String[]> iterator, int column) throws IOException {
         jsonGenerator.writeStartObject();
@@ -59,7 +74,7 @@ public class DependencyCounterMojo extends AbstractMojo {
             String[] values = iterator.next();
             jsonGenerator.writeFieldName(values[0]);
             if (values[column] != null && values[column].isEmpty()) {
-                jsonGenerator.writeString(values[0]);
+                jsonGenerator.writeString("[" + values[0] + "]");
             } else {
                 jsonGenerator.writeString(values[column]);
             }
@@ -80,4 +95,22 @@ public class DependencyCounterMojo extends AbstractMojo {
                 .setPrettyPrinter(new DefaultPrettyPrinter());
     }
 
+    static class Language {
+
+        String code;
+        int column;
+
+        public Language(String code, int column) {
+            this.code = code;
+            this.column = column;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public int getColumn() {
+            return column;
+        }
+    }
 }
