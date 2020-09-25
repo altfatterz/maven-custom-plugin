@@ -3,25 +3,24 @@ package com.example.maven.plugin;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import org.simpleflatmapper.lightningcsv.CloseableCsvReader;
 import org.simpleflatmapper.lightningcsv.CsvReader;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class Translator {
 
-    public List<Map<String, String>> translate(CsvReader csvReader) {
+    public Map<String, String> translate(CsvReader csvReader) {
         List<String[]> content = getContent(csvReader);
         List<Language> languages = getLanguages(content);
 
-        List<Map<String, String>> response = new ArrayList<>();
+        Map<String, String> response = new HashMap<>();
         JsonFactory jsonFactory = new JsonFactory();
 
         languages.forEach(language -> {
@@ -33,7 +32,7 @@ public class Translator {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            response.add(Collections.singletonMap(language.code, writer.toString()));
+            response.put(language.code, writer.toString());
         });
 
         return response;

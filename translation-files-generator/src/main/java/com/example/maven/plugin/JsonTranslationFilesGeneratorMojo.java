@@ -1,28 +1,19 @@
 package com.example.maven.plugin;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.simpleflatmapper.csv.CsvParser;
-import org.simpleflatmapper.lightningcsv.CloseableCsvReader;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_RESOURCES)
 public class JsonTranslationFilesGeneratorMojo extends AbstractMojo {
@@ -40,60 +31,21 @@ public class JsonTranslationFilesGeneratorMojo extends AbstractMojo {
 
         Translator translator = new Translator();
         try {
-            List<Map<String,String>> response = translator.translate(CsvParser.reader(new FileReader(input)));
-
+            Map<String, String> response = translator.translate(CsvParser.reader(new FileReader(input)));
+            response.keySet().stream().forEach(language -> {
+                try {
+                    Path translationFile = createTranslationFile(language);
+                    Files.writeString(translationFile, response.get(language), StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        List<Language> languages = getLanguages(input);
-        languages.stream().forEach(language -> generateTranslationInJson(input, language.code, language.column));
 
         getLog().info("JSON translation were successfully generated");
-    }
-
-
-    private List<Language> getLanguages(File input) {
-        List<Language> languages = Collections.emptyList();
-        try (CloseableCsvReader reader = CsvParser.reader(input)) {
-            String[] headers = reader.iterator().next();
-            languages = IntStream.range(1, headers.length)
-                    .mapToObj(i -> new Language(headers[i].toLowerCase(), i))
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return languages;
-    }
-
-    public void generateTranslationInJson(File input, String language, int languageColumn) {
-        try (CloseableCsvReader reader = CsvParser.reader(input)) {
-            Iterator<String[]> iterator = reader.iterator();
-            iterator.next(); // ignore headers
-            try (JsonGenerator jsonGenerator = createJsonGenerator(language, new JsonFactory())) {
-                writeContent(jsonGenerator, iterator, languageColumn);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    void writeContent(JsonGenerator jsonGenerator, Iterator<String[]> iterator, int column) throws IOException {
-        jsonGenerator.writeStartObject();
-        jsonGenerator.writeRaw('\n');
-        while (iterator.hasNext()) {
-            String[] values = iterator.next();
-            jsonGenerator.writeFieldName(values[0]);
-            if (values[column] != null && values[column].isEmpty()) {
-                jsonGenerator.writeString("[" + values[0] + "]");
-            } else {
-                jsonGenerator.writeString(values[column]);
-            }
-
-        }
-        jsonGenerator.writeRaw('\n');
-        jsonGenerator.writeEndObject();
     }
 
     Path createTranslationFile(String language) throws IOException {
@@ -102,19 +54,4 @@ public class JsonTranslationFilesGeneratorMojo extends AbstractMojo {
         return Files.createFile(path);
     }
 
-    JsonGenerator createJsonGenerator(String language, JsonFactory jsonFactory) throws IOException {
-        return jsonFactory.createGenerator(Files.newOutputStream(createTranslationFile(language)))
-                .setPrettyPrinter(new DefaultPrettyPrinter());
-    }
-
-    static class Language {
-
-        String code;
-        int column;
-
-        public Language(String code, int column) {
-            this.code = code;
-            this.column = column;
-        }
-    }
 }
