@@ -10,6 +10,7 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <modules>
+        <module>translation-files-generator-kotlin</module>
         <module>translation-files-generator</module>
         <module>usage-example</module>
     </modules>
