@@ -11,6 +11,7 @@ import org.simpleflatmapper.csv.CsvParser;
 import org.simpleflatmapper.lightningcsv.CloseableCsvReader;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,6 +19,8 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -34,6 +37,15 @@ public class JsonTranslationFilesGeneratorMojo extends AbstractMojo {
         getLog().info("Generating JSON translation files...");
         getLog().info("Processing input CSV translation file from :" + input.getAbsolutePath());
         getLog().info("Output will be written to directory:" + output.getAbsolutePath());
+
+        Translator translator = new Translator();
+        try {
+            List<Map<String,String>> response = translator.translate(CsvParser.reader(new FileReader(input)));
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         List<Language> languages = getLanguages(input);
         languages.stream().forEach(language -> generateTranslationInJson(input, language.code, language.column));

@@ -3,37 +3,40 @@ package com.example.maven.plugin;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import org.simpleflatmapper.lightningcsv.CloseableCsvReader;
 import org.simpleflatmapper.lightningcsv.CsvReader;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class Translator {
 
-    List<Writer> translate(CsvReader csvReader, Class<? extends Writer> writerClass) {
+    public List<Map<String, String>> translate(CsvReader csvReader) {
         List<String[]> content = getContent(csvReader);
         List<Language> languages = getLanguages(content);
 
-        List<Writer> writers = new ArrayList<>();
+        List<Map<String, String>> response = new ArrayList<>();
         JsonFactory jsonFactory = new JsonFactory();
 
         languages.forEach(language -> {
-            Writer writer;
+            Writer writer = new StringWriter();
             try {
-                writer = writerClass.getDeclaredConstructor().newInstance();
-                writers.add(writer);
                 JsonGenerator jsonGenerator = jsonFactory.createGenerator(writer).setPrettyPrinter(new DefaultPrettyPrinter());
                 writeContent(jsonGenerator, content, language.column);
                 jsonGenerator.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            response.add(Collections.singletonMap(language.code, writer.toString()));
         });
 
-        return writers;
+        return response;
     }
 
     void writeContent(JsonGenerator jsonGenerator, List<String[]> content, int column) throws IOException {
