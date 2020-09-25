@@ -33,15 +33,6 @@ public class Translator {
             }
         });
 
-        writers.stream().forEach(writer -> System.out.println("writer: " + writer.toString()));
-        writers.stream().forEach(writer -> {
-            try {
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-
         return writers;
     }
 
@@ -49,13 +40,11 @@ public class Translator {
         jsonGenerator.writeStartObject();
         content.stream().skip(1).forEach(values -> {
             try {
-                System.out.println(values[0]);
                 jsonGenerator.writeFieldName(values[0]);
                 if (values[column] != null && values[column].isEmpty()) {
                     jsonGenerator.writeString("[" + values[0] + "]");
                 } else {
                     jsonGenerator.writeString(values[column]);
-                    System.out.println(values[column]);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

@@ -20,8 +20,9 @@ public class TranslatorTest {
     public void translate() throws IOException {
         CsvReader reader = CsvParser.reader(
                 "\"KEY\",\"EN\",\"DE\"\n" +
-                        "\"key1\",\"enval1\",\"deval1\"\n" +
-                        "\"key2\",\"enval2\",\"deval2\""
+                        "\"key1\",\"enval1\",\n" +
+                        "\"key2\",\"enval2\",\"deval2\"\n" +
+                        "\"key3\",,\"deval3\""
         );
 
         List<Writer> response = translator.translate(reader, StringWriter.class);
@@ -29,12 +30,14 @@ public class TranslatorTest {
         assertEquals("" +
                 "{\n" +
                 "  \"key1\" : \"enval1\",\n" +
-                "  \"key2\" : \"enval2\"\n" +
+                "  \"key2\" : \"enval2\",\n" +
+                "  \"key3\" : \"[key3]\"\n" +
                 "}", response.get(0).toString());
         assertEquals("" +
                 "{\n" +
-                "  \"key1\" : \"deval1\",\n" +
-                "  \"key2\" : \"deval2\"\n" +
+                "  \"key1\" : \"[key1]\",\n" +
+                "  \"key2\" : \"deval2\",\n" +
+                "  \"key3\" : \"deval3\"\n" +
                 "}", response.get(1).toString());
     }
 
