@@ -41,3 +41,6 @@ output:
     }
 ]
 ```
+
+Resources:
+- https://gist.github.com/arnaudroger/7cbb9ca1acda66341fc10bf54ab01439
