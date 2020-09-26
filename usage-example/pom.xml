@@ -34,7 +34,7 @@
         <plugins>
             <plugin>
                 <groupId>org.example</groupId>
-                <artifactId>translation-files-generator</artifactId>
+                <artifactId>translation-files-generator-kotlin</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
                 <executions>
                     <execution>
