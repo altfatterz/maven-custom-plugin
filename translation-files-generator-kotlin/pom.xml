@@ -21,6 +21,12 @@
         <maven-plugin-annotations.version>3.6.0</maven-plugin-annotations.version>
         <maven-project.version>2.2.1</maven-project.version>
         <maven-plugin-plugin.version>3.6.0</maven-plugin-plugin.version>
+
+        <sfm-csv.version>8.2.3</sfm-csv.version>
+        <jackson.version>2.11.2</jackson.version>
+
+        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+        <junit.version>4.12</junit.version>
     </properties>
 
     <dependencies>
@@ -42,12 +48,12 @@
         <dependency>
             <groupId>org.simpleflatmapper</groupId>
             <artifactId>sfm-csv</artifactId>
-            <version>8.2.3</version>
+            <version>${sfm-csv.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.11.2</version>
+            <version>${jackson.version}</version>
         </dependency>
 
         <!-- kotlin dependencies -->
@@ -59,12 +65,11 @@
 
         <!-- test dependencies -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.7.0</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -98,6 +103,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
             </plugin>
         </plugins>
 

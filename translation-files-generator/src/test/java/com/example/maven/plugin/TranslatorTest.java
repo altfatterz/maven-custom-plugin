@@ -1,13 +1,13 @@
 package com.example.maven.plugin;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.simpleflatmapper.csv.CsvParser;
 import org.simpleflatmapper.lightningcsv.CsvReader;
 
 import java.io.IOException;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public class TranslatorTest {
 
